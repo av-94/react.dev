@@ -67,9 +67,75 @@ Content submitted to [react.dev](https://react.dev/) is CC-BY-4.0 licensed, as f
 ## Mermaid diagrams
 
 ```mermaid
-graph TD;
-A-->B;
-A-->C;
-B-->D;
-C-->D;
+flowchart TD
+
+id{{onStartPartExceptionResolver}}
+
+    id --> items{do we have items}    
+    items -->|YES| payload[create payload priceAndAvailabilitySearch]
+    items --> |NO| orderResolver([onStartOrderResolver])
+    itemsNote -.- items
+    
+    payload -->  postAPICall[POST priceAndAvailabilitySearch API Call]
+    
+    postAPICall --> hasParts{has parts}
+    hasParts -.- partsNote
+    hasParts --> |YES| partException[redirect to part exceptions page]
+    hasParts-->|NO| orderResolver
+
+    partException --> parseAvailability[parse first availability response]
+    parseAvailability --> addLineAttributes[Add line attributes to selected data]
+    addLineAttributes --> replacementParts{has replacement parts}
+    replacementParts-->|YES| callPriceAndAvailability[call priceAndAvailabilitySearch with new replaced parts]
+    callPriceAndAvailability-->replacementParts
+    replacementParts-->|NO|parseReplacementParts[parse replacement parts table]
+    parseReplacementParts--> parseAlternateParts[parse alternate parts table]
+    parseAlternateParts-->parseSelectedData[parse selected data]
+    parseSelectedData-->orderResolver
+ 
+    orderNote -.- orderResolver
+
+    
+
+
+   
+    
+
+    
+  
+
+orderResolver:::malva
+id:::green
+
+classDef blue fill:#9edbf8
+classDef green fill:#aaed92
+classDef malva fill:#d8c7ff
+
+    
+   
+subgraph itemsNote[SOS Response with data]
+  ic1["
+  newParts: [{...}]
+  modifiedQuantityParts: [...]
+  modifiedNumberParts: [...]"]
+end
+
+subgraph partsNote[Has data on any of below]
+  pc1["
+   replacement parts 
+   alternate  parts 
+   indirect replacement parts"]
+end
+
+subgraph orderNote[Context]
+  o1["
+    cart
+    sos
+    newParts
+    modifiedQuantityParts
+    modifiedNumberParts
+    modifiedLineParts
+    notModifiedParts
+  "]
+end
 ``` 
